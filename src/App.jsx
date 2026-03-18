@@ -794,12 +794,34 @@ function ScoresTab(){
           ou:odds?.overUnder||"—",prov:odds?.provider?.name||"",
           rawOdds:JSON.stringify(rawOdds).slice(0,500)};
       });
-      setGames(allGames);
+      
+      // For games missing odds (finals), try the summary endpoint
+      const gamesWithOdds=await Promise.all(allGames.map(async(g)=>{
+        if(g.spread!=="—") return g;
+        try{
+          const sumResp=await fetch(`https://site.web.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/summary?event=${g.id}`);
+          if(sumResp.ok){
+            const sumData=await sumResp.json();
+            // Try pickcenter, odds, or header for spread info
+            const pc=sumData?.pickcenter?.[0];
+            const hi=sumData?.header?.competitions?.[0];
+            const hiOdds=hi?.odds?.[0];
+            const spread=pc?.spread||pc?.details?.match?.(/([+-]?\d+\.?\d*)/)?.[1]||hiOdds?.spread||"—";
+            const detail=pc?.details||hiOdds?.details||"";
+            const ou=pc?.overUnder||hiOdds?.overUnder||g.ou;
+            const prov=pc?.provider?.name||hiOdds?.provider?.name||"";
+            return {...g,spread,spreadDetail:detail,ou,prov,
+              rawOdds:JSON.stringify({pickcenter:sumData?.pickcenter,headerOdds:hi?.odds}).slice(0,500)};
+          }
+        }catch(e){console.error("Summary fetch failed for",g.id,e);}
+        return g;
+      }));
+      setGames(gamesWithOdds);
       
       // Match First Four games
       const updated=[...firstFour];
       updated.forEach((pi,idx)=>{
-        const match=allGames.find(g=>
+        const match=gamesWithOdds.find(g=>
           (g.t1full.includes(pi.team1)&&g.t2full.includes(pi.team2))||
           (g.t1full.includes(pi.team2)&&g.t2full.includes(pi.team1))
         );
