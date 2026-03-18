@@ -5,7 +5,7 @@ const B={"East":[["1","Duke",null,null,null,null,null,null,null,null,null,null,n
 
 const J=[{"n":"Anderson, John","r":["Furman","","","","","",""],"o":[]},{"n":"Bordick, Mark","r":["Gonzaga","","","","","",""],"o":[]},{"n":"Bordick, Reese","r":["Virginia","","","","","",""],"o":[]},{"n":"Bordick, Teah","r":["Cal Baptist","","","","","",""],"o":[]},{"n":"Bordick, Tyler","r":["Louisville","","","","","",""],"o":[]},{"n":"Boyle, Colin","r":["Troy","","","","","",""],"o":[]},{"n":"Butterfield, Scott","r":["Purdue","","","","","",""],"o":[]},{"n":"Catanzarita, Meghan","r":["Lehigh","","","","","",""],"o":[]},{"n":"Fallon, Dan","r":["Wisconsin","","","","","",""],"o":[]},{"n":"Fallon, Frank","r":["Michigan","","","","","",""],"o":[]},{"n":"Gaul, Erik","r":["Alabama","","","","","",""],"o":[]},{"n":"Gaul, Keara","r":["Howard","","","","","",""],"o":[]},{"n":"Gill, Connor","r":["Saint Mary's","","","","","",""],"o":[]},{"n":"Gill, Dai","r":["Vanderbilt","","","","","",""],"o":[]},{"n":"Guttman, John","r":["North Carolina","","","","","",""],"o":[]},{"n":"Hanlon, Andy","r":["Missouri","","","","","",""],"o":[]},{"n":"Hanlon, Laura","r":["UConn","","","","","",""],"o":[]},{"n":"Hicks, Dave","r":["North Dakota State","","","","","",""],"o":[]},{"n":"Hicks, Kerry","r":["Miami (FL)","","","","","",""],"o":[]},{"n":"Jordan, Craig","r":["Hawaii","","","","","",""],"o":[]},{"n":"Karch, Brynn","r":["Arkansas","","","","","",""],"o":[]},{"n":"Karch, Dave","r":["Houston","","","","","",""],"o":[]},{"n":"Karch, Eloise","r":["Duke","","","","","",""],"o":[]},{"n":"Lubarsky, Kevin","r":["SMU/Miami (OH)","","","","","",""],"o":[]},{"n":"Maguire, Bill","r":["Kennesaw State","","","","","",""],"o":[]},{"n":"Martin, Vin","r":["South Florida","","","","","",""],"o":[]},{"n":"McCarthy, Ryan","r":["High Point","","","","","",""],"o":[]},{"n":"McGovern, Bob","r":["Long Island","","","","","",""],"o":[]},{"n":"McMahon, Annie","r":["Arizona","","","","","",""],"o":[]},{"n":"McMahon, Julian","r":["UCF","","","","","",""],"o":[]},{"n":"McMahon, Leith","r":["Idaho","","","","","",""],"o":[]},{"n":"McMahon, Max","r":["VCU","","","","","",""],"o":[]},{"n":"McMahon, Rich","r":["TCU","","","","","",""],"o":[]},{"n":"Molinski, Jay","r":["Clemson","","","","","",""],"o":[]},{"n":"Mortenson, Jim","r":["Texas A&M","","","","","",""],"o":[]},{"n":"Moulton, Eric","r":["Nebraska","","","","","",""],"o":[]},{"n":"Polanskij, Bohdan","r":["Florida","","","","","",""],"o":[]},{"n":"Polanskij, Zander","r":["Texas","","","","","",""],"o":[]},{"n":"Reilly Jr, Tim","r":["BYU","","","","","",""],"o":[]},{"n":"Reilly Sr, Tim","r":["Akron","","","","","",""],"o":[]},{"n":"Richardi, Andrew","r":["Queens","","","","","",""],"o":[]},{"n":"Richardi, Justin","r":["Georgia","","","","","",""],"o":[]},{"n":"Richardi, Rob","r":["Siena","","","","","",""],"o":[]},{"n":"Schmitt, Katie","r":["Kansas","","","","","",""],"o":[]},{"n":"Schmitt, Tom","r":["Tennessee","","","","","",""],"o":[]},{"n":"Scruggs, Pat","r":["Saint Louis","","","","","",""],"o":[]},{"n":"Sobieszczanski, Marguerite","r":["Northern Iowa","","","","","",""],"o":[]},{"n":"Solomon, Jordan","r":["Ohio State","","","","","",""],"o":[]},{"n":"Sparaco, Erica","r":["Wright State","","","","","",""],"o":[]},{"n":"Specht, Willie","r":["Iowa State","","","","","",""],"o":[]},{"n":"Stagaard, Maren","r":["Kentucky","","","","","",""],"o":[]},{"n":"Stagaard, Meg","r":["McNeese","","","","","",""],"o":[]},{"n":"Stagaard, Ryan","r":["Texas Tech","","","","","",""],"o":[]},{"n":"Stagaard, Ward","r":["Iowa","","","","","",""],"o":[]},{"n":"Szabo, Matt","r":["Utah State","","","","","",""],"o":[]},{"n":"Taylor, Billy","r":["Penn","","","","","",""],"o":[]},{"n":"Taylor, Katherine","r":["Hofstra","","","","","",""],"o":[]},{"n":"Tempesta, Rick","r":["Michigan State","","","","","",""],"o":[]},{"n":"Ward, Jack","r":["Tennessee State","","","","","",""],"o":[]},{"n":"Ward, John","r":["Illinois","","","","","",""],"o":[]},{"n":"Wigdor, Paul","r":["Villanova","","","","","",""],"o":[]},{"n":"Wolf, Pat","r":["Santa Clara","","","","","",""],"o":[]},{"n":"Wyville, Mark","r":["UCLA","","","","","",""],"o":[]},{"n":"Zaragosa, Kris","r":["Saint John's","","","","","",""],"o":[]}];
 
-const TC={"Duke":"#003087","Alabama":"#9E1B32","Auburn":"#0C2340","Florida":"#0021A5","Houston":"#C8102E","Purdue":"#CEB888","Oregon":"#154733","Arizona":"#CC0033","Kentucky":"#0033A0","Tennessee":"#FF8200","Michigan":"#FFCB05"};
+const TC={"Duke":"#003087","Alabama":"#9E1B32","Auburn":"#0C2340","Florida":"#0021A5","Houston":"#C8102E","Purdue":"#CEB888","Oregon":"#154733","Arizona":"#CC0033","Kentucky":"#0033A0","Tennessee":"#FF8200","Michigan":"#FFCB05","Michigan State":"#18453B","Texas Tech":"#CC0000","Wisconsin":"#C5050C","BYU":"#002E5D","UConn":"#000E2F","Baylor":"#154734","Kansas":"#0051BA","Marquette":"#003366","Iowa State":"#C8102E","Texas A&M":"#500000","Saint John's":"#BA0C2F","Creighton":"#005CA9","Arkansas":"#9D2235","Mount Saint Mary's":"#003478","VCU":"#F8B800","Robert Morris":"#14234B","Alabama State":"#C99700","Liberty":"#002D62","Akron":"#041E42","Vanderbilt":"#866D4B","Montana":"#6C2740","Saint Mary's":"#D50032","Ole Miss":"#CE1126","Illinois":"#E84A27","Gonzaga":"#002967","Maryland":"#E03A3E","Colorado State":"#1E4D2B","Memphis":"#003087","McNeese":"#00529B","North Carolina":"#7BAFD4","Norfolk State":"#007A53","Oklahoma":"#841617","Yale":"#00356B","Wofford":"#886B2C","Mississippi State":"#660000","Georgia":"#BA0C2F","Drake":"#004477","Clemson":"#F56600","Troy":"#8B2332","UCLA":"#2D68C4","Xavier":"#0C2340","Utah State":"#0F2439","Louisville":"#AD0000","Missouri":"#F1B82D","New Mexico":"#BA0C2F","UC San Diego":"#182B49","High Point":"#330072","Grand Canyon":"#522398","UNCW":"#006666","Bryant":"#000000","Lipscomb":"#231F20","SIU Edwardsville":"#CC0000","Omaha":"#000000","Ohio State":"#BB0000","TCU":"#4D1979","UCF":"#BA9B37","South Florida":"#006747","Northern Iowa":"#4B116F","Cal Baptist":"#002554","North Dakota State":"#006A32","Furman":"#582C83","Siena":"#006747","Villanova":"#003366","Miami (FL)":"#F47321","Hawaii":"#024731","Kennesaw State":"#FDBB30","Queens":"#002D62","Long Island":"#FFD204","Nebraska":"#E41C38","Iowa":"#FFCD00","Penn":"#011F5B","Idaho":"#B5985A","Lehigh":"#653819","Prairie View":"#4F2D7F","Virginia":"#232D4B","Saint Louis":"#003DA5","Santa Clara":"#862633","SMU":"#CC0035","Miami (OH)":"#B61E2E","Hofstra":"#003591","Wright State":"#007A33","Tennessee State":"#003DA5","Howard":"#003A63","UMBC":"#000000","NC State":"#CC0000","Texas":"#BF5700","Michigan State":"#18453B"};
 
 const RC = { East:"#1a5276", South:"#922b21", Midwest:"#196f3d", West:"#7d6608" };
 const TAN = "#f0d9a8";
@@ -775,9 +775,12 @@ function ScoresTab(){
       const data=await resp.json();
       setError("Found "+((data.events||[]).length)+" events");
       const allGames=(data.events||[]).map(ev=>{
-        const comp=ev.competitions?.[0];const ts=comp?.competitors||[];const odds=comp?.odds?.[0];
+        const comp=ev.competitions?.[0];const ts=comp?.competitors||[];
+        const odds=comp?.odds?.[0];
         const t1name=ts[0]?.team?.displayName||ts[0]?.team?.shortDisplayName||"?";
         const t2name=ts[1]?.team?.displayName||ts[1]?.team?.shortDisplayName||"?";
+        // Capture raw odds for debugging
+        const rawOdds=comp?.odds||[];
         return {id:ev.id,name:ev.shortName||"",
           status:comp?.status?.type?.name||"",
           detail:comp?.status?.type?.shortDetail||comp?.status?.type?.description||"",
@@ -786,8 +789,10 @@ function ScoresTab(){
           t1:ts[0]?.team?.shortDisplayName||"?",t1full:t1name,s1:ts[0]?.score||"—",
           t2:ts[1]?.team?.shortDisplayName||"?",t2full:t2name,s2:ts[1]?.score||"—",
           sd1:ts[0]?.curatedRank?.current,sd2:ts[1]?.curatedRank?.current,
-          spread:odds?.spread||"—",spreadDetail:odds?.details||"",
-          ou:odds?.overUnder||"—",prov:odds?.provider?.name||""};
+          spread:odds?.spread||odds?.pointSpread?.american||"—",
+          spreadDetail:odds?.details||odds?.spread?.toString()||"",
+          ou:odds?.overUnder||"—",prov:odds?.provider?.name||"",
+          rawOdds:JSON.stringify(rawOdds).slice(0,500)};
       });
       setGames(allGames);
       
@@ -930,7 +935,7 @@ function ScoresTab(){
       <div style={{fontWeight:700,fontSize:13,marginBottom:6,fontFamily:F}}>All Games — {date}</div>
       {games.length>0?(
         <table style={{borderCollapse:"collapse",fontSize:11,fontFamily:F,width:"100%"}}>
-          <thead><tr>{["Status","Away","Score","Home","Score","Spread","O/U","Provider"].map(h =>
+          <thead><tr>{["Status","Away","Score","Home","Score","Spread","O/U","Provider","Raw Odds (debug)"].map(h =>
             <th key={h} style={thS}>{h}</th>
           )}</tr></thead>
           <tbody>{games.map(g=>{
@@ -944,6 +949,7 @@ function ScoresTab(){
               <td style={{...tdS,textAlign:"center"}}>{g.spreadDetail||g.spread}</td>
               <td style={{...tdS,textAlign:"center"}}>{g.ou}</td>
               <td style={{...tdS,fontSize:10,color:"#666"}}>{g.prov}</td>
+              <td style={{...tdS,fontSize:8,color:"#999",maxWidth:300,overflow:"hidden",whiteSpace:"nowrap"}}>{g.rawOdds}</td>
             </tr>);
           })}</tbody>
         </table>
