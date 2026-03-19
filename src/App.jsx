@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { db, ref, set, get, onValue } from "./firebase.js";
+import { db, ref, set, get } from "./firebase.js";
 
 // 2026 KNOCKOUT POOL DATA — defaults, will be overwritten by Firebase
 let B={"East":[["1","Duke",null,null,null,null,null,null,null,null,null,null,null,null],["-27.5","Karch, Eloise",null,null,null,null,null,null,null,null,null,null,null,null],["16","Siena",null,null,null,null,null,null,null,null,null,null,null,null],["27.5","Richardi, Rob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Ohio State",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Solomon, Jordan",null,null,null,null,null,null,null,null,null,null,null,null],["9","TCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Rich",null,null,null,null,null,null,null,null,null,null,null,null],["5","Saint John's",null,null,null,null,null,null,null,null,null,null,null,null],["-9.5","Zaragosa, Kris",null,null,null,null,null,null,null,null,null,null,null,null],["12","Northern Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["9.5","Sobieszczanski, Marguerite",null,null,null,null,null,null,null,null,null,null,null,null],["4","Kansas",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Schmitt, Katie",null,null,null,null,null,null,null,null,null,null,null,null],["13","Cal Baptist",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Bordick, Teah",null,null,null,null,null,null,null,null,null,null,null,null],["6","Louisville",null,null,null,null,null,null,null,null,null,null,null,null],["-6.5","Bordick, Tyler",null,null,null,null,null,null,null,null,null,null,null,null],["11","South Florida",null,null,null,null,null,null,null,null,null,null,null,null],["6.5","Martin, Vin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Michigan State",null,null,null,null,null,null,null,null,null,null,null,null],["-16.5","Tempesta, Rick",null,null,null,null,null,null,null,null,null,null,null,null],["14","North Dakota State",null,null,null,null,null,null,null,null,null,null,null,null],["16.5","Hicks, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["7","UCLA",null,null,null,null,null,null,null,null,null,null,null,null],["-5.5","Wyville, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["10","UCF",null,null,null,null,null,null,null,null,null,null,null,null],["5.5","McMahon, Julian",null,null,null,null,null,null,null,null,null,null,null,null],["2","UConn",null,null,null,null,null,null,null,null,null,null,null,null],["-20.5","Hanlon, Laura",null,null,null,null,null,null,null,null,null,null,null,null],["15","Furman",null,null,null,null,null,null,null,null,null,null,null,null],["20.5","Anderson, John",null,null,null,null,null,null,null,null,null,null,null,null]],"South":[["1","Florida",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Polanskij, Bohdan",null,null,null,null,null,null,null,null,null,null,null,null],["16","Lehigh",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Catanzarita, Meghan",null,null,null,null,null,null,null,null,null,null,null,null],["8","Clemson",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Molinski, Jay",null,null,null,null,null,null,null,null,null,null,null,null],["9","Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Stagaard, Ward",null,null,null,null,null,null,null,null,null,null,null,null],["5","Vanderbilt",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Gill, Dai",null,null,null,null,null,null,null,null,null,null,null,null],["12","McNeese",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","Stagaard, Meg",null,null,null,null,null,null,null,null,null,null,null,null],["4","Nebraska",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Moulton, Eric",null,null,null,null,null,null,null,null,null,null,null,null],["13","Troy",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Boyle, Colin",null,null,null,null,null,null,null,null,null,null,null,null],["6","North Carolina",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Guttman, John",null,null,null,null,null,null,null,null,null,null,null,null],["11","VCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Max",null,null,null,null,null,null,null,null,null,null,null,null],["3","Illinois",null,null,null,null,null,null,null,null,null,null,null,null],["-21.5","Ward, John",null,null,null,null,null,null,null,null,null,null,null,null],["14","Penn",null,null,null,null,null,null,null,null,null,null,null,null],["21.5","Taylor, Billy",null,null,null,null,null,null,null,null,null,null,null,null],["7","Saint Mary's",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Gill, Connor",null,null,null,null,null,null,null,null,null,null,null,null],["10","Texas A&M",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Mortenson, Jim",null,null,null,null,null,null,null,null,null,null,null,null],["2","Houston",null,null,null,null,null,null,null,null,null,null,null,null],["-22.5","Karch, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["15","Idaho",null,null,null,null,null,null,null,null,null,null,null,null],["22.5","McMahon, Leith",null,null,null,null,null,null,null,null,null,null,null,null]],"Midwest":[["1","Michigan",null,null,null,null,null,null,null,null,null,null,null,null],["-31.5","Fallon, Frank",null,null,null,null,null,null,null,null,null,null,null,null],["16","Howard",null,null,null,null,null,null,null,null,null,null,null,null],["31.5","Gaul, Keara",null,null,null,null,null,null,null,null,null,null,null,null],["8","Georgia",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Richardi, Justin",null,null,null,null,null,null,null,null,null,null,null,null],["9","Saint Louis",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Scruggs, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["5","Texas Tech",null,null,null,null,null,null,null,null,null,null,null,null],["-8.5","Stagaard, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["12","Akron",null,null,null,null,null,null,null,null,null,null,null,null],["8.5","Reilly Sr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["4","Alabama",null,null,null,null,null,null,null,null,null,null,null,null],["-12.5","Gaul, Erik",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hofstra",null,null,null,null,null,null,null,null,null,null,null,null],["12.5","Taylor, Katherine",null,null,null,null,null,null,null,null,null,null,null,null],["6","Tennessee",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Schmitt, Tom",null,null,null,null,null,null,null,null,null,null,null,null],["11","SMU/Miami (OH)",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Lubarsky, Kevin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Virginia",null,null,null,null,null,null,null,null,null,null,null,null],["-17.5","Bordick, Reese",null,null,null,null,null,null,null,null,null,null,null,null],["14","Wright State",null,null,null,null,null,null,null,null,null,null,null,null],["17.5","Sparaco, Erica",null,null,null,null,null,null,null,null,null,null,null,null],["7","Kentucky",null,null,null,null,null,null,null,null,null,null,null,null],["-3.5","Stagaard, Maren",null,null,null,null,null,null,null,null,null,null,null,null],["10","Santa Clara",null,null,null,null,null,null,null,null,null,null,null,null],["3.5","Wolf, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["2","Iowa State",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Specht, Willie",null,null,null,null,null,null,null,null,null,null,null,null],["15","Tennessee State",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Ward, Jack",null,null,null,null,null,null,null,null,null,null,null,null]],"West":[["1","Arizona",null,null,null,null,null,null,null,null,null,null,null,null],["-29.5","McMahon, Annie",null,null,null,null,null,null,null,null,null,null,null,null],["16","Long Island",null,null,null,null,null,null,null,null,null,null,null,null],["29.5","McGovern, Bob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Villanova",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Wigdor, Paul",null,null,null,null,null,null,null,null,null,null,null,null],["9","Utah State",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Szabo, Matt",null,null,null,null,null,null,null,null,null,null,null,null],["5","Wisconsin",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Fallon, Dan",null,null,null,null,null,null,null,null,null,null,null,null],["12","High Point",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","McCarthy, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["4","Arkansas",null,null,null,null,null,null,null,null,null,null,null,null],["-15.5","Karch, Brynn",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hawaii",null,null,null,null,null,null,null,null,null,null,null,null],["15.5","Jordan, Craig",null,null,null,null,null,null,null,null,null,null,null,null],["6","BYU",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Reilly Jr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["11","Texas",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Polanskij, Zander",null,null,null,null,null,null,null,null,null,null,null,null],["3","Gonzaga",null,null,null,null,null,null,null,null,null,null,null,null],["-18.5","Bordick, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["14","Kennesaw State",null,null,null,null,null,null,null,null,null,null,null,null],["18.5","Maguire, Bill",null,null,null,null,null,null,null,null,null,null,null,null],["7","Miami (FL)",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Hicks, Kerry",null,null,null,null,null,null,null,null,null,null,null,null],["10","Missouri",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Hanlon, Andy",null,null,null,null,null,null,null,null,null,null,null,null],["2","Purdue",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Butterfield, Scott",null,null,null,null,null,null,null,null,null,null,null,null],["15","Queens",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Richardi, Andrew",null,null,null,null,null,null,null,null,null,null,null,null]],"FinalFour":[[null,"Final 4",null,null,"Championship",null,null,"Winner"],[null,null,null,null,null,null,null,null],["East",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["South",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["West",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["Midwest",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]]};
@@ -721,26 +721,26 @@ function findTeamInBracket(teamName){
 }
 
 // ═══════════════════════════════════════════════
-// FIREBASE SYNC
+// FIREBASE SYNC — only locked games, not full bracket
 // ═══════════════════════════════════════════════
-const DB_PATH="knockout2026";
+const DB_PATH="knockout2026/lockedGames";
 
 async function loadFromFirebase(){
   try{
     const snap=await get(ref(db,DB_PATH));
     if(snap.exists()){
-      const data=snap.val();
-      if(data.B) B=data.B;
-      if(data.J) J=data.J;
-      if(data.lockedGames) return data.lockedGames;
+      console.log("Firebase: loaded lockedGames",snap.val());
+      return snap.val();
     }
+    console.log("Firebase: no data yet");
   }catch(e){console.error("Firebase load error:",e);}
   return {};
 }
 
-async function saveToFirebase(lockedGames){
+async function saveLockedGame(gameId,gameData){
   try{
-    await set(ref(db,DB_PATH),{B,J,lockedGames,lastUpdated:new Date().toISOString()});
+    await set(ref(db,DB_PATH+"/"+gameId),gameData);
+    console.log("Firebase: saved game",gameId,gameData);
   }catch(e){console.error("Firebase save error:",e);}
 }
 
@@ -749,28 +749,17 @@ async function saveToFirebase(lockedGames){
 // ═══════════════════════════════════════════════
 export default function App(){
   const [tab,setTab]=useState("standings");
-  const [ver,setVer]=useState(0); // bump to force re-render after Firebase updates
+  const [ver,setVer]=useState(0);
   const [lockedGames,setLockedGames]=useState({});
   const [loaded,setLoaded]=useState(false);
 
-  // Load from Firebase on mount
+  // Load from Firebase on mount — simple one-time read
   useEffect(()=>{
     loadFromFirebase().then(lg=>{
       setLockedGames(lg||{});
       setLoaded(true);
       setVer(v=>v+1);
     });
-    // Also listen for real-time updates from other clients
-    const unsub=onValue(ref(db,DB_PATH),(snap)=>{
-      if(snap.exists()){
-        const data=snap.val();
-        if(data.B) B=data.B;
-        if(data.J) J=data.J;
-        if(data.lockedGames) setLockedGames(data.lockedGames);
-        setVer(v=>v+1);
-      }
-    });
-    return ()=>unsub();
   },[]);
 
   const tabs=[
@@ -963,7 +952,10 @@ function ScoresTab({lockedGames={},onLock}){
       }
       if(changed){
         setLockedGames(newLocked);
-        saveToFirebase(newLocked);
+        // Save each new game individually to Firebase
+        for(const[id,gData] of Object.entries(newLocked)){
+          if(!lockedGames[id]) saveLockedGame(id,gData);
+        }
         if(onLock) onLock(newLocked);
       }
     }catch(e){console.error(e);setError("Error: "+e.message);setGames([]);}
