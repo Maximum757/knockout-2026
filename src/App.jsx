@@ -1,9 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { db, ref, set, get, onValue } from "./firebase.js";
 
-// 2026 KNOCKOUT POOL DATA
-const B={"East":[["1","Duke",null,null,null,null,null,null,null,null,null,null,null,null],["-27.5","Karch, Eloise",null,null,null,null,null,null,null,null,null,null,null,null],["16","Siena",null,null,null,null,null,null,null,null,null,null,null,null],["27.5","Richardi, Rob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Ohio State",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Solomon, Jordan",null,null,null,null,null,null,null,null,null,null,null,null],["9","TCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Rich",null,null,null,null,null,null,null,null,null,null,null,null],["5","Saint John's",null,null,null,null,null,null,null,null,null,null,null,null],["-9.5","Zaragosa, Kris",null,null,null,null,null,null,null,null,null,null,null,null],["12","Northern Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["9.5","Sobieszczanski, Marguerite",null,null,null,null,null,null,null,null,null,null,null,null],["4","Kansas",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Schmitt, Katie",null,null,null,null,null,null,null,null,null,null,null,null],["13","Cal Baptist",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Bordick, Teah",null,null,null,null,null,null,null,null,null,null,null,null],["6","Louisville",null,null,null,null,null,null,null,null,null,null,null,null],["-6.5","Bordick, Tyler",null,null,null,null,null,null,null,null,null,null,null,null],["11","South Florida",null,null,null,null,null,null,null,null,null,null,null,null],["6.5","Martin, Vin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Michigan State",null,null,null,null,null,null,null,null,null,null,null,null],["-16.5","Tempesta, Rick",null,null,null,null,null,null,null,null,null,null,null,null],["14","North Dakota State",null,null,null,null,null,null,null,null,null,null,null,null],["16.5","Hicks, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["7","UCLA",null,null,null,null,null,null,null,null,null,null,null,null],["-5.5","Wyville, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["10","UCF",null,null,null,null,null,null,null,null,null,null,null,null],["5.5","McMahon, Julian",null,null,null,null,null,null,null,null,null,null,null,null],["2","UConn",null,null,null,null,null,null,null,null,null,null,null,null],["-20.5","Hanlon, Laura",null,null,null,null,null,null,null,null,null,null,null,null],["15","Furman",null,null,null,null,null,null,null,null,null,null,null,null],["20.5","Anderson, John",null,null,null,null,null,null,null,null,null,null,null,null]],"South":[["1","Florida",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Polanskij, Bohdan",null,null,null,null,null,null,null,null,null,null,null,null],["16","Lehigh",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Catanzarita, Meghan",null,null,null,null,null,null,null,null,null,null,null,null],["8","Clemson",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Molinski, Jay",null,null,null,null,null,null,null,null,null,null,null,null],["9","Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Stagaard, Ward",null,null,null,null,null,null,null,null,null,null,null,null],["5","Vanderbilt",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Gill, Dai",null,null,null,null,null,null,null,null,null,null,null,null],["12","McNeese",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","Stagaard, Meg",null,null,null,null,null,null,null,null,null,null,null,null],["4","Nebraska",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Moulton, Eric",null,null,null,null,null,null,null,null,null,null,null,null],["13","Troy",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Boyle, Colin",null,null,null,null,null,null,null,null,null,null,null,null],["6","North Carolina",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Guttman, John",null,null,null,null,null,null,null,null,null,null,null,null],["11","VCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Max",null,null,null,null,null,null,null,null,null,null,null,null],["3","Illinois",null,null,null,null,null,null,null,null,null,null,null,null],["-21.5","Ward, John",null,null,null,null,null,null,null,null,null,null,null,null],["14","Penn",null,null,null,null,null,null,null,null,null,null,null,null],["21.5","Taylor, Billy",null,null,null,null,null,null,null,null,null,null,null,null],["7","Saint Mary's",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Gill, Connor",null,null,null,null,null,null,null,null,null,null,null,null],["10","Texas A&M",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Mortenson, Jim",null,null,null,null,null,null,null,null,null,null,null,null],["2","Houston",null,null,null,null,null,null,null,null,null,null,null,null],["-22.5","Karch, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["15","Idaho",null,null,null,null,null,null,null,null,null,null,null,null],["22.5","McMahon, Leith",null,null,null,null,null,null,null,null,null,null,null,null]],"Midwest":[["1","Michigan",null,null,null,null,null,null,null,null,null,null,null,null],["-31.5","Fallon, Frank",null,null,null,null,null,null,null,null,null,null,null,null],["16","Howard",null,null,null,null,null,null,null,null,null,null,null,null],["31.5","Gaul, Keara",null,null,null,null,null,null,null,null,null,null,null,null],["8","Georgia",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Richardi, Justin",null,null,null,null,null,null,null,null,null,null,null,null],["9","Saint Louis",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Scruggs, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["5","Texas Tech",null,null,null,null,null,null,null,null,null,null,null,null],["-8.5","Stagaard, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["12","Akron",null,null,null,null,null,null,null,null,null,null,null,null],["8.5","Reilly Sr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["4","Alabama",null,null,null,null,null,null,null,null,null,null,null,null],["-12.5","Gaul, Erik",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hofstra",null,null,null,null,null,null,null,null,null,null,null,null],["12.5","Taylor, Katherine",null,null,null,null,null,null,null,null,null,null,null,null],["6","Tennessee",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Schmitt, Tom",null,null,null,null,null,null,null,null,null,null,null,null],["11","SMU/Miami (OH)",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Lubarsky, Kevin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Virginia",null,null,null,null,null,null,null,null,null,null,null,null],["-17.5","Bordick, Reese",null,null,null,null,null,null,null,null,null,null,null,null],["14","Wright State",null,null,null,null,null,null,null,null,null,null,null,null],["17.5","Sparaco, Erica",null,null,null,null,null,null,null,null,null,null,null,null],["7","Kentucky",null,null,null,null,null,null,null,null,null,null,null,null],["-3.5","Stagaard, Maren",null,null,null,null,null,null,null,null,null,null,null,null],["10","Santa Clara",null,null,null,null,null,null,null,null,null,null,null,null],["3.5","Wolf, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["2","Iowa State",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Specht, Willie",null,null,null,null,null,null,null,null,null,null,null,null],["15","Tennessee State",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Ward, Jack",null,null,null,null,null,null,null,null,null,null,null,null]],"West":[["1","Arizona",null,null,null,null,null,null,null,null,null,null,null,null],["-29.5","McMahon, Annie",null,null,null,null,null,null,null,null,null,null,null,null],["16","Long Island",null,null,null,null,null,null,null,null,null,null,null,null],["29.5","McGovern, Bob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Villanova",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Wigdor, Paul",null,null,null,null,null,null,null,null,null,null,null,null],["9","Utah State",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Szabo, Matt",null,null,null,null,null,null,null,null,null,null,null,null],["5","Wisconsin",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Fallon, Dan",null,null,null,null,null,null,null,null,null,null,null,null],["12","High Point",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","McCarthy, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["4","Arkansas",null,null,null,null,null,null,null,null,null,null,null,null],["-15.5","Karch, Brynn",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hawaii",null,null,null,null,null,null,null,null,null,null,null,null],["15.5","Jordan, Craig",null,null,null,null,null,null,null,null,null,null,null,null],["6","BYU",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Reilly Jr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["11","Texas",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Polanskij, Zander",null,null,null,null,null,null,null,null,null,null,null,null],["3","Gonzaga",null,null,null,null,null,null,null,null,null,null,null,null],["-18.5","Bordick, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["14","Kennesaw State",null,null,null,null,null,null,null,null,null,null,null,null],["18.5","Maguire, Bill",null,null,null,null,null,null,null,null,null,null,null,null],["7","Miami (FL)",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Hicks, Kerry",null,null,null,null,null,null,null,null,null,null,null,null],["10","Missouri",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Hanlon, Andy",null,null,null,null,null,null,null,null,null,null,null,null],["2","Purdue",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Butterfield, Scott",null,null,null,null,null,null,null,null,null,null,null,null],["15","Queens",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Richardi, Andrew",null,null,null,null,null,null,null,null,null,null,null,null]],"FinalFour":[[null,"Final 4",null,null,"Championship",null,null,"Winner"],[null,null,null,null,null,null,null,null],["East",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["South",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["West",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["Midwest",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]]};
+// 2026 KNOCKOUT POOL DATA — defaults, will be overwritten by Firebase
+let B={"East":[["1","Duke",null,null,null,null,null,null,null,null,null,null,null,null],["-27.5","Karch, Eloise",null,null,null,null,null,null,null,null,null,null,null,null],["16","Siena",null,null,null,null,null,null,null,null,null,null,null,null],["27.5","Richardi, Rob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Ohio State",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Solomon, Jordan",null,null,null,null,null,null,null,null,null,null,null,null],["9","TCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Rich",null,null,null,null,null,null,null,null,null,null,null,null],["5","Saint John's",null,null,null,null,null,null,null,null,null,null,null,null],["-9.5","Zaragosa, Kris",null,null,null,null,null,null,null,null,null,null,null,null],["12","Northern Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["9.5","Sobieszczanski, Marguerite",null,null,null,null,null,null,null,null,null,null,null,null],["4","Kansas",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Schmitt, Katie",null,null,null,null,null,null,null,null,null,null,null,null],["13","Cal Baptist",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Bordick, Teah",null,null,null,null,null,null,null,null,null,null,null,null],["6","Louisville",null,null,null,null,null,null,null,null,null,null,null,null],["-6.5","Bordick, Tyler",null,null,null,null,null,null,null,null,null,null,null,null],["11","South Florida",null,null,null,null,null,null,null,null,null,null,null,null],["6.5","Martin, Vin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Michigan State",null,null,null,null,null,null,null,null,null,null,null,null],["-16.5","Tempesta, Rick",null,null,null,null,null,null,null,null,null,null,null,null],["14","North Dakota State",null,null,null,null,null,null,null,null,null,null,null,null],["16.5","Hicks, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["7","UCLA",null,null,null,null,null,null,null,null,null,null,null,null],["-5.5","Wyville, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["10","UCF",null,null,null,null,null,null,null,null,null,null,null,null],["5.5","McMahon, Julian",null,null,null,null,null,null,null,null,null,null,null,null],["2","UConn",null,null,null,null,null,null,null,null,null,null,null,null],["-20.5","Hanlon, Laura",null,null,null,null,null,null,null,null,null,null,null,null],["15","Furman",null,null,null,null,null,null,null,null,null,null,null,null],["20.5","Anderson, John",null,null,null,null,null,null,null,null,null,null,null,null]],"South":[["1","Florida",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Polanskij, Bohdan",null,null,null,null,null,null,null,null,null,null,null,null],["16","Lehigh",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Catanzarita, Meghan",null,null,null,null,null,null,null,null,null,null,null,null],["8","Clemson",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Molinski, Jay",null,null,null,null,null,null,null,null,null,null,null,null],["9","Iowa",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Stagaard, Ward",null,null,null,null,null,null,null,null,null,null,null,null],["5","Vanderbilt",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Gill, Dai",null,null,null,null,null,null,null,null,null,null,null,null],["12","McNeese",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","Stagaard, Meg",null,null,null,null,null,null,null,null,null,null,null,null],["4","Nebraska",null,null,null,null,null,null,null,null,null,null,null,null],["-13.5","Moulton, Eric",null,null,null,null,null,null,null,null,null,null,null,null],["13","Troy",null,null,null,null,null,null,null,null,null,null,null,null],["13.5","Boyle, Colin",null,null,null,null,null,null,null,null,null,null,null,null],["6","North Carolina",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Guttman, John",null,null,null,null,null,null,null,null,null,null,null,null],["11","VCU",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","McMahon, Max",null,null,null,null,null,null,null,null,null,null,null,null],["3","Illinois",null,null,null,null,null,null,null,null,null,null,null,null],["-21.5","Ward, John",null,null,null,null,null,null,null,null,null,null,null,null],["14","Penn",null,null,null,null,null,null,null,null,null,null,null,null],["21.5","Taylor, Billy",null,null,null,null,null,null,null,null,null,null,null,null],["7","Saint Mary's",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Gill, Connor",null,null,null,null,null,null,null,null,null,null,null,null],["10","Texas A&M",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Mortenson, Jim",null,null,null,null,null,null,null,null,null,null,null,null],["2","Houston",null,null,null,null,null,null,null,null,null,null,null,null],["-22.5","Karch, Dave",null,null,null,null,null,null,null,null,null,null,null,null],["15","Idaho",null,null,null,null,null,null,null,null,null,null,null,null],["22.5","McMahon, Leith",null,null,null,null,null,null,null,null,null,null,null,null]],"Midwest":[["1","Michigan",null,null,null,null,null,null,null,null,null,null,null,null],["-31.5","Fallon, Frank",null,null,null,null,null,null,null,null,null,null,null,null],["16","Howard",null,null,null,null,null,null,null,null,null,null,null,null],["31.5","Gaul, Keara",null,null,null,null,null,null,null,null,null,null,null,null],["8","Georgia",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Richardi, Justin",null,null,null,null,null,null,null,null,null,null,null,null],["9","Saint Louis",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Scruggs, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["5","Texas Tech",null,null,null,null,null,null,null,null,null,null,null,null],["-8.5","Stagaard, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["12","Akron",null,null,null,null,null,null,null,null,null,null,null,null],["8.5","Reilly Sr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["4","Alabama",null,null,null,null,null,null,null,null,null,null,null,null],["-12.5","Gaul, Erik",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hofstra",null,null,null,null,null,null,null,null,null,null,null,null],["12.5","Taylor, Katherine",null,null,null,null,null,null,null,null,null,null,null,null],["6","Tennessee",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Schmitt, Tom",null,null,null,null,null,null,null,null,null,null,null,null],["11","SMU/Miami (OH)",null,null,null,null,null,null,null,null,null,null,null,null],[null,"Lubarsky, Kevin",null,null,null,null,null,null,null,null,null,null,null,null],["3","Virginia",null,null,null,null,null,null,null,null,null,null,null,null],["-17.5","Bordick, Reese",null,null,null,null,null,null,null,null,null,null,null,null],["14","Wright State",null,null,null,null,null,null,null,null,null,null,null,null],["17.5","Sparaco, Erica",null,null,null,null,null,null,null,null,null,null,null,null],["7","Kentucky",null,null,null,null,null,null,null,null,null,null,null,null],["-3.5","Stagaard, Maren",null,null,null,null,null,null,null,null,null,null,null,null],["10","Santa Clara",null,null,null,null,null,null,null,null,null,null,null,null],["3.5","Wolf, Pat",null,null,null,null,null,null,null,null,null,null,null,null],["2","Iowa State",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Specht, Willie",null,null,null,null,null,null,null,null,null,null,null,null],["15","Tennessee State",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Ward, Jack",null,null,null,null,null,null,null,null,null,null,null,null]],"West":[["1","Arizona",null,null,null,null,null,null,null,null,null,null,null,null],["-29.5","McMahon, Annie",null,null,null,null,null,null,null,null,null,null,null,null],["16","Long Island",null,null,null,null,null,null,null,null,null,null,null,null],["29.5","McGovern, Bob",null,null,null,null,null,null,null,null,null,null,null,null],["8","Villanova",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Wigdor, Paul",null,null,null,null,null,null,null,null,null,null,null,null],["9","Utah State",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Szabo, Matt",null,null,null,null,null,null,null,null,null,null,null,null],["5","Wisconsin",null,null,null,null,null,null,null,null,null,null,null,null],["-11.5","Fallon, Dan",null,null,null,null,null,null,null,null,null,null,null,null],["12","High Point",null,null,null,null,null,null,null,null,null,null,null,null],["11.5","McCarthy, Ryan",null,null,null,null,null,null,null,null,null,null,null,null],["4","Arkansas",null,null,null,null,null,null,null,null,null,null,null,null],["-15.5","Karch, Brynn",null,null,null,null,null,null,null,null,null,null,null,null],["13","Hawaii",null,null,null,null,null,null,null,null,null,null,null,null],["15.5","Jordan, Craig",null,null,null,null,null,null,null,null,null,null,null,null],["6","BYU",null,null,null,null,null,null,null,null,null,null,null,null],["-1.5","Reilly Jr, Tim",null,null,null,null,null,null,null,null,null,null,null,null],["11","Texas",null,null,null,null,null,null,null,null,null,null,null,null],["1.5","Polanskij, Zander",null,null,null,null,null,null,null,null,null,null,null,null],["3","Gonzaga",null,null,null,null,null,null,null,null,null,null,null,null],["-18.5","Bordick, Mark",null,null,null,null,null,null,null,null,null,null,null,null],["14","Kennesaw State",null,null,null,null,null,null,null,null,null,null,null,null],["18.5","Maguire, Bill",null,null,null,null,null,null,null,null,null,null,null,null],["7","Miami (FL)",null,null,null,null,null,null,null,null,null,null,null,null],["-2.5","Hicks, Kerry",null,null,null,null,null,null,null,null,null,null,null,null],["10","Missouri",null,null,null,null,null,null,null,null,null,null,null,null],["2.5","Hanlon, Andy",null,null,null,null,null,null,null,null,null,null,null,null],["2","Purdue",null,null,null,null,null,null,null,null,null,null,null,null],["-23.5","Butterfield, Scott",null,null,null,null,null,null,null,null,null,null,null,null],["15","Queens",null,null,null,null,null,null,null,null,null,null,null,null],["23.5","Richardi, Andrew",null,null,null,null,null,null,null,null,null,null,null,null]],"FinalFour":[[null,"Final 4",null,null,"Championship",null,null,"Winner"],[null,null,null,null,null,null,null,null],["East",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["South",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["West",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],["Midwest",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]]};
 
-const J=[{"n":"Anderson, John","r":["Furman","","","","","",""],"o":[]},{"n":"Bordick, Mark","r":["Gonzaga","","","","","",""],"o":[]},{"n":"Bordick, Reese","r":["Virginia","","","","","",""],"o":[]},{"n":"Bordick, Teah","r":["Cal Baptist","","","","","",""],"o":[]},{"n":"Bordick, Tyler","r":["Louisville","","","","","",""],"o":[]},{"n":"Boyle, Colin","r":["Troy","","","","","",""],"o":[]},{"n":"Butterfield, Scott","r":["Purdue","","","","","",""],"o":[]},{"n":"Catanzarita, Meghan","r":["Lehigh","","","","","",""],"o":[]},{"n":"Fallon, Dan","r":["Wisconsin","","","","","",""],"o":[]},{"n":"Fallon, Frank","r":["Michigan","","","","","",""],"o":[]},{"n":"Gaul, Erik","r":["Alabama","","","","","",""],"o":[]},{"n":"Gaul, Keara","r":["Howard","","","","","",""],"o":[]},{"n":"Gill, Connor","r":["Saint Mary's","","","","","",""],"o":[]},{"n":"Gill, Dai","r":["Vanderbilt","","","","","",""],"o":[]},{"n":"Guttman, John","r":["North Carolina","","","","","",""],"o":[]},{"n":"Hanlon, Andy","r":["Missouri","","","","","",""],"o":[]},{"n":"Hanlon, Laura","r":["UConn","","","","","",""],"o":[]},{"n":"Hicks, Dave","r":["North Dakota State","","","","","",""],"o":[]},{"n":"Hicks, Kerry","r":["Miami (FL)","","","","","",""],"o":[]},{"n":"Jordan, Craig","r":["Hawaii","","","","","",""],"o":[]},{"n":"Karch, Brynn","r":["Arkansas","","","","","",""],"o":[]},{"n":"Karch, Dave","r":["Houston","","","","","",""],"o":[]},{"n":"Karch, Eloise","r":["Duke","","","","","",""],"o":[]},{"n":"Lubarsky, Kevin","r":["SMU/Miami (OH)","","","","","",""],"o":[]},{"n":"Maguire, Bill","r":["Kennesaw State","","","","","",""],"o":[]},{"n":"Martin, Vin","r":["South Florida","","","","","",""],"o":[]},{"n":"McCarthy, Ryan","r":["High Point","","","","","",""],"o":[]},{"n":"McGovern, Bob","r":["Long Island","","","","","",""],"o":[]},{"n":"McMahon, Annie","r":["Arizona","","","","","",""],"o":[]},{"n":"McMahon, Julian","r":["UCF","","","","","",""],"o":[]},{"n":"McMahon, Leith","r":["Idaho","","","","","",""],"o":[]},{"n":"McMahon, Max","r":["VCU","","","","","",""],"o":[]},{"n":"McMahon, Rich","r":["TCU","","","","","",""],"o":[]},{"n":"Molinski, Jay","r":["Clemson","","","","","",""],"o":[]},{"n":"Mortenson, Jim","r":["Texas A&M","","","","","",""],"o":[]},{"n":"Moulton, Eric","r":["Nebraska","","","","","",""],"o":[]},{"n":"Polanskij, Bohdan","r":["Florida","","","","","",""],"o":[]},{"n":"Polanskij, Zander","r":["Texas","","","","","",""],"o":[]},{"n":"Reilly Jr, Tim","r":["BYU","","","","","",""],"o":[]},{"n":"Reilly Sr, Tim","r":["Akron","","","","","",""],"o":[]},{"n":"Richardi, Andrew","r":["Queens","","","","","",""],"o":[]},{"n":"Richardi, Justin","r":["Georgia","","","","","",""],"o":[]},{"n":"Richardi, Rob","r":["Siena","","","","","",""],"o":[]},{"n":"Schmitt, Katie","r":["Kansas","","","","","",""],"o":[]},{"n":"Schmitt, Tom","r":["Tennessee","","","","","",""],"o":[]},{"n":"Scruggs, Pat","r":["Saint Louis","","","","","",""],"o":[]},{"n":"Sobieszczanski, Marguerite","r":["Northern Iowa","","","","","",""],"o":[]},{"n":"Solomon, Jordan","r":["Ohio State","","","","","",""],"o":[]},{"n":"Sparaco, Erica","r":["Wright State","","","","","",""],"o":[]},{"n":"Specht, Willie","r":["Iowa State","","","","","",""],"o":[]},{"n":"Stagaard, Maren","r":["Kentucky","","","","","",""],"o":[]},{"n":"Stagaard, Meg","r":["McNeese","","","","","",""],"o":[]},{"n":"Stagaard, Ryan","r":["Texas Tech","","","","","",""],"o":[]},{"n":"Stagaard, Ward","r":["Iowa","","","","","",""],"o":[]},{"n":"Szabo, Matt","r":["Utah State","","","","","",""],"o":[]},{"n":"Taylor, Billy","r":["Penn","","","","","",""],"o":[]},{"n":"Taylor, Katherine","r":["Hofstra","","","","","",""],"o":[]},{"n":"Tempesta, Rick","r":["Michigan State","","","","","",""],"o":[]},{"n":"Ward, Jack","r":["Tennessee State","","","","","",""],"o":[]},{"n":"Ward, John","r":["Illinois","","","","","",""],"o":[]},{"n":"Wigdor, Paul","r":["Villanova","","","","","",""],"o":[]},{"n":"Wolf, Pat","r":["Santa Clara","","","","","",""],"o":[]},{"n":"Wyville, Mark","r":["UCLA","","","","","",""],"o":[]},{"n":"Zaragosa, Kris","r":["Saint John's","","","","","",""],"o":[]}];
+let J=[{"n":"Anderson, John","r":["Furman","","","","","",""],"o":[]},{"n":"Bordick, Mark","r":["Gonzaga","","","","","",""],"o":[]},{"n":"Bordick, Reese","r":["Virginia","","","","","",""],"o":[]},{"n":"Bordick, Teah","r":["Cal Baptist","","","","","",""],"o":[]},{"n":"Bordick, Tyler","r":["Louisville","","","","","",""],"o":[]},{"n":"Boyle, Colin","r":["Troy","","","","","",""],"o":[]},{"n":"Butterfield, Scott","r":["Purdue","","","","","",""],"o":[]},{"n":"Catanzarita, Meghan","r":["Lehigh","","","","","",""],"o":[]},{"n":"Fallon, Dan","r":["Wisconsin","","","","","",""],"o":[]},{"n":"Fallon, Frank","r":["Michigan","","","","","",""],"o":[]},{"n":"Gaul, Erik","r":["Alabama","","","","","",""],"o":[]},{"n":"Gaul, Keara","r":["Howard","","","","","",""],"o":[]},{"n":"Gill, Connor","r":["Saint Mary's","","","","","",""],"o":[]},{"n":"Gill, Dai","r":["Vanderbilt","","","","","",""],"o":[]},{"n":"Guttman, John","r":["North Carolina","","","","","",""],"o":[]},{"n":"Hanlon, Andy","r":["Missouri","","","","","",""],"o":[]},{"n":"Hanlon, Laura","r":["UConn","","","","","",""],"o":[]},{"n":"Hicks, Dave","r":["North Dakota State","","","","","",""],"o":[]},{"n":"Hicks, Kerry","r":["Miami (FL)","","","","","",""],"o":[]},{"n":"Jordan, Craig","r":["Hawaii","","","","","",""],"o":[]},{"n":"Karch, Brynn","r":["Arkansas","","","","","",""],"o":[]},{"n":"Karch, Dave","r":["Houston","","","","","",""],"o":[]},{"n":"Karch, Eloise","r":["Duke","","","","","",""],"o":[]},{"n":"Lubarsky, Kevin","r":["SMU/Miami (OH)","","","","","",""],"o":[]},{"n":"Maguire, Bill","r":["Kennesaw State","","","","","",""],"o":[]},{"n":"Martin, Vin","r":["South Florida","","","","","",""],"o":[]},{"n":"McCarthy, Ryan","r":["High Point","","","","","",""],"o":[]},{"n":"McGovern, Bob","r":["Long Island","","","","","",""],"o":[]},{"n":"McMahon, Annie","r":["Arizona","","","","","",""],"o":[]},{"n":"McMahon, Julian","r":["UCF","","","","","",""],"o":[]},{"n":"McMahon, Leith","r":["Idaho","","","","","",""],"o":[]},{"n":"McMahon, Max","r":["VCU","","","","","",""],"o":[]},{"n":"McMahon, Rich","r":["TCU","","","","","",""],"o":[]},{"n":"Molinski, Jay","r":["Clemson","","","","","",""],"o":[]},{"n":"Mortenson, Jim","r":["Texas A&M","","","","","",""],"o":[]},{"n":"Moulton, Eric","r":["Nebraska","","","","","",""],"o":[]},{"n":"Polanskij, Bohdan","r":["Florida","","","","","",""],"o":[]},{"n":"Polanskij, Zander","r":["Texas","","","","","",""],"o":[]},{"n":"Reilly Jr, Tim","r":["BYU","","","","","",""],"o":[]},{"n":"Reilly Sr, Tim","r":["Akron","","","","","",""],"o":[]},{"n":"Richardi, Andrew","r":["Queens","","","","","",""],"o":[]},{"n":"Richardi, Justin","r":["Georgia","","","","","",""],"o":[]},{"n":"Richardi, Rob","r":["Siena","","","","","",""],"o":[]},{"n":"Schmitt, Katie","r":["Kansas","","","","","",""],"o":[]},{"n":"Schmitt, Tom","r":["Tennessee","","","","","",""],"o":[]},{"n":"Scruggs, Pat","r":["Saint Louis","","","","","",""],"o":[]},{"n":"Sobieszczanski, Marguerite","r":["Northern Iowa","","","","","",""],"o":[]},{"n":"Solomon, Jordan","r":["Ohio State","","","","","",""],"o":[]},{"n":"Sparaco, Erica","r":["Wright State","","","","","",""],"o":[]},{"n":"Specht, Willie","r":["Iowa State","","","","","",""],"o":[]},{"n":"Stagaard, Maren","r":["Kentucky","","","","","",""],"o":[]},{"n":"Stagaard, Meg","r":["McNeese","","","","","",""],"o":[]},{"n":"Stagaard, Ryan","r":["Texas Tech","","","","","",""],"o":[]},{"n":"Stagaard, Ward","r":["Iowa","","","","","",""],"o":[]},{"n":"Szabo, Matt","r":["Utah State","","","","","",""],"o":[]},{"n":"Taylor, Billy","r":["Penn","","","","","",""],"o":[]},{"n":"Taylor, Katherine","r":["Hofstra","","","","","",""],"o":[]},{"n":"Tempesta, Rick","r":["Michigan State","","","","","",""],"o":[]},{"n":"Ward, Jack","r":["Tennessee State","","","","","",""],"o":[]},{"n":"Ward, John","r":["Illinois","","","","","",""],"o":[]},{"n":"Wigdor, Paul","r":["Villanova","","","","","",""],"o":[]},{"n":"Wolf, Pat","r":["Santa Clara","","","","","",""],"o":[]},{"n":"Wyville, Mark","r":["UCLA","","","","","",""],"o":[]},{"n":"Zaragosa, Kris","r":["Saint John's","","","","","",""],"o":[]}];
 
 const TC={"Duke":"#003087","Alabama":"#9E1B32","Auburn":"#0C2340","Florida":"#0021A5","Houston":"#C8102E","Purdue":"#CEB888","Oregon":"#154733","Arizona":"#CC0033","Kentucky":"#0033A0","Tennessee":"#FF8200","Michigan":"#FFCB05","Michigan State":"#18453B","Texas Tech":"#CC0000","Wisconsin":"#C5050C","BYU":"#002E5D","UConn":"#000E2F","Baylor":"#154734","Kansas":"#0051BA","Marquette":"#003366","Iowa State":"#C8102E","Texas A&M":"#500000","Saint John's":"#BA0C2F","Creighton":"#005CA9","Arkansas":"#9D2235","Mount Saint Mary's":"#003478","VCU":"#F8B800","Robert Morris":"#14234B","Alabama State":"#C99700","Liberty":"#002D62","Akron":"#041E42","Vanderbilt":"#866D4B","Montana":"#6C2740","Saint Mary's":"#D50032","Ole Miss":"#CE1126","Illinois":"#E84A27","Gonzaga":"#002967","Maryland":"#E03A3E","Colorado State":"#1E4D2B","Memphis":"#003087","McNeese":"#00529B","North Carolina":"#7BAFD4","Norfolk State":"#007A53","Oklahoma":"#841617","Yale":"#00356B","Wofford":"#886B2C","Mississippi State":"#660000","Georgia":"#BA0C2F","Drake":"#004477","Clemson":"#F56600","Troy":"#8B2332","UCLA":"#2D68C4","Xavier":"#0C2340","Utah State":"#0F2439","Louisville":"#AD0000","Missouri":"#F1B82D","New Mexico":"#BA0C2F","UC San Diego":"#182B49","High Point":"#330072","Grand Canyon":"#522398","UNCW":"#006666","Bryant":"#000000","Lipscomb":"#231F20","SIU Edwardsville":"#CC0000","Omaha":"#000000","Ohio State":"#BB0000","TCU":"#4D1979","UCF":"#BA9B37","South Florida":"#006747","Northern Iowa":"#4B116F","Cal Baptist":"#002554","North Dakota State":"#006A32","Furman":"#582C83","Siena":"#006747","Villanova":"#003366","Miami (FL)":"#F47321","Hawaii":"#024731","Kennesaw State":"#FDBB30","Queens":"#002D62","Long Island":"#FFD204","Nebraska":"#E41C38","Iowa":"#FFCD00","Penn":"#011F5B","Idaho":"#B5985A","Lehigh":"#653819","Prairie View":"#4F2D7F","Virginia":"#232D4B","Saint Louis":"#003DA5","Santa Clara":"#862633","SMU":"#CC0035","Miami (OH)":"#B61E2E","Hofstra":"#003591","Wright State":"#007A33","Tennessee State":"#003DA5","Howard":"#003A63","UMBC":"#000000","NC State":"#CC0000","Texas":"#BF5700","Michigan State":"#18453B"};
 
@@ -696,10 +697,82 @@ const ths={padding:"3px 5px",fontSize:10,fontWeight:700,color:"#000",textAlign:"
   fontFamily:"Arial,sans-serif",whiteSpace:"nowrap",borderBottom:"2px solid #000",border:"1px solid #ccc"};
 
 // ═══════════════════════════════════════════════
+// COVER/UPSET/STEAL ENGINE
+// ═══════════════════════════════════════════════
+function determineOutcome(favScore, dogScore, spread){
+  const fav=parseFloat(favScore),dog=parseFloat(dogScore),spr=Math.abs(parseFloat(spread));
+  if(isNaN(fav)||isNaN(dog)||isNaN(spr)) return null;
+  if(dog>fav) return "UPSET";
+  if(fav>dog) return (fav-dog)>spr?"COVER":"STEAL";
+  return "PICKEM";
+}
+
+// Map team names to their region and bracket position
+function findTeamInBracket(teamName){
+  for(const region of ["East","South","Midwest","West"]){
+    const grid=B[region];
+    for(let r=0;r<grid.length;r++){
+      if(grid[r][1]===teamName){
+        return {region,row:r,col:1};
+      }
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════
+// FIREBASE SYNC
+// ═══════════════════════════════════════════════
+const DB_PATH="knockout2026";
+
+async function loadFromFirebase(){
+  try{
+    const snap=await get(ref(db,DB_PATH));
+    if(snap.exists()){
+      const data=snap.val();
+      if(data.B) B=data.B;
+      if(data.J) J=data.J;
+      if(data.lockedGames) return data.lockedGames;
+    }
+  }catch(e){console.error("Firebase load error:",e);}
+  return {};
+}
+
+async function saveToFirebase(lockedGames){
+  try{
+    await set(ref(db,DB_PATH),{B,J,lockedGames,lastUpdated:new Date().toISOString()});
+  }catch(e){console.error("Firebase save error:",e);}
+}
+
+// ═══════════════════════════════════════════════
 // APP — flat nav: Standings | East | South | Midwest | West | Final Four
 // ═══════════════════════════════════════════════
 export default function App(){
   const [tab,setTab]=useState("standings");
+  const [ver,setVer]=useState(0); // bump to force re-render after Firebase updates
+  const [lockedGames,setLockedGames]=useState({});
+  const [loaded,setLoaded]=useState(false);
+
+  // Load from Firebase on mount
+  useEffect(()=>{
+    loadFromFirebase().then(lg=>{
+      setLockedGames(lg||{});
+      setLoaded(true);
+      setVer(v=>v+1);
+    });
+    // Also listen for real-time updates from other clients
+    const unsub=onValue(ref(db,DB_PATH),(snap)=>{
+      if(snap.exists()){
+        const data=snap.val();
+        if(data.B) B=data.B;
+        if(data.J) J=data.J;
+        if(data.lockedGames) setLockedGames(data.lockedGames);
+        setVer(v=>v+1);
+      }
+    });
+    return ()=>unsub();
+  },[]);
+
   const tabs=[
     {id:"standings",label:"Standings",color:"#000"},
     {id:"East",label:"East",color:RC.East},
@@ -734,20 +807,21 @@ export default function App(){
 
       {/* Content */}
       <div style={{padding:"4px 8px"}}>
-        {tab==="standings"&&<JourneyView onNav={r=>setTab(r)}/>}
-        {tab==="East"&&<RegionBracket region="East" data={B.East}/>}
-        {tab==="South"&&<RegionBracket region="South" data={B.South}/>}
-        {tab==="Midwest"&&<RegionBracket region="Midwest" data={B.Midwest}/>}
-        {tab==="West"&&<RegionBracket region="West" data={B.West}/>}
-        {tab==="FinalFour"&&<FinalFourBracket data={B.FinalFour}/>}
-        {tab==="scores"&&<ScoresTab/>}
-        {tab==="admin"&&<AdminTab/>}
+        {!loaded&&<div style={{padding:20,fontSize:12,color:"#666"}}>Loading from Firebase...</div>}
+        {loaded&&tab==="standings"&&<JourneyView key={ver} onNav={r=>setTab(r)}/>}
+        {loaded&&tab==="East"&&<RegionBracket key={ver} region="East" data={B.East}/>}
+        {loaded&&tab==="South"&&<RegionBracket key={ver} region="South" data={B.South}/>}
+        {loaded&&tab==="Midwest"&&<RegionBracket key={ver} region="Midwest" data={B.Midwest}/>}
+        {loaded&&tab==="West"&&<RegionBracket key={ver} region="West" data={B.West}/>}
+        {loaded&&tab==="FinalFour"&&<FinalFourBracket key={ver} data={B.FinalFour}/>}
+        {loaded&&tab==="scores"&&<ScoresTab key={ver} lockedGames={lockedGames} onLock={(lg)=>{setLockedGames(lg);setVer(v=>v+1);}}/>}
+        {loaded&&tab==="admin"&&<AdminTab/>}
       </div>
     </div>
   );
 }
 
-function ScoresTab(){
+function ScoresTab({lockedGames={},onLock}){
   const F="Arial,sans-serif";
   const [date,setDate]=useState(new Date().toISOString().split("T")[0]);
   const [games,setGames]=useState([]);
@@ -853,6 +927,45 @@ function ScoresTab(){
         }
       });
       setFirstFour(updated);
+      
+      // AUTO-LOCK: For any FINAL game not yet locked, save to Firebase
+      let newLocked={...lockedGames};
+      let changed=false;
+      for(const g of gamesWithOdds){
+        if(g.status==="STATUS_FINAL"&&!newLocked[g.id]&&g.spread!=="—"){
+          const s1=parseFloat(g.s1),s2=parseFloat(g.s2);
+          const sprNum=parseFloat(g.spread);
+          if(isNaN(s1)||isNaN(s2)||isNaN(sprNum)) continue;
+          
+          // Determine fav/dog from spread detail
+          let favTeam=g.t1full,dogTeam=g.t2full,favScore=s1,dogScore=s2;
+          if(g.spreadDetail){
+            const m=g.spreadDetail.match(/^(.+?)\s+([+-]?\d+\.?\d*)$/);
+            if(m){
+              const favAbbr=m[1].trim();
+              const t1IsFav=g.t1full.toUpperCase().startsWith(favAbbr.toUpperCase().slice(0,3));
+              if(!t1IsFav){favTeam=g.t2full;dogTeam=g.t1full;favScore=s2;dogScore=s1;}
+            }
+          }else if(sprNum>0){
+            favTeam=g.t2full;dogTeam=g.t1full;favScore=s2;dogScore=s1;
+          }
+          
+          const outcome=determineOutcome(favScore,dogScore,Math.abs(sprNum));
+          newLocked[g.id]={
+            t1:g.t1full,t2:g.t2full,s1:g.s1,s2:g.s2,
+            spread:g.spread,spreadDetail:g.spreadDetail,
+            favTeam,dogTeam,favScore:String(favScore),dogScore:String(dogScore),
+            outcome,lockedAt:new Date().toISOString()
+          };
+          changed=true;
+          setError(prev=>(prev||"")+" | Locked: "+g.name+" → "+outcome);
+        }
+      }
+      if(changed){
+        setLockedGames(newLocked);
+        saveToFirebase(newLocked);
+        if(onLock) onLock(newLocked);
+      }
     }catch(e){console.error(e);setError("Error: "+e.message);setGames([]);}
     setLoading(false);
   };
@@ -976,6 +1089,32 @@ function ScoresTab(){
           })}</tbody>
         </table>
       ):<div style={{padding:20,color:"#666",fontSize:12}}>Click Fetch Scores to pull games from ESPN.</div>}
+      
+      {/* Locked Games from Firebase */}
+      {Object.keys(lockedGames).length>0&&(
+        <div style={{marginTop:20}}>
+          <div style={{fontWeight:700,fontSize:13,marginBottom:6,fontFamily:F}}>Locked Results (saved to Firebase)</div>
+          <table style={{borderCollapse:"collapse",fontSize:11,fontFamily:F}}>
+            <thead><tr>{["Game","Favorite","Score","Underdog","Score","Spread","Outcome","Locked At"].map(h=>
+              <th key={h} style={thS}>{h}</th>
+            )}</tr></thead>
+            <tbody>{Object.entries(lockedGames).map(([id,g])=>(
+              <tr key={id}>
+                <td style={tdS}>{g.t1} vs {g.t2}</td>
+                <td style={{...tdS,fontWeight:700}}>{g.favTeam}</td>
+                <td style={{...tdS,textAlign:"center",fontWeight:700}}>{g.favScore}</td>
+                <td style={{...tdS,fontWeight:700}}>{g.dogTeam}</td>
+                <td style={{...tdS,textAlign:"center",fontWeight:700}}>{g.dogScore}</td>
+                <td style={{...tdS,textAlign:"center"}}>{g.spread}</td>
+                <td style={{...tdS,fontWeight:800,
+                  color:g.outcome==="COVER"?"#000":g.outcome==="UPSET"?"#cc0000":g.outcome==="STEAL"?"#006400":"#666"
+                }}>{g.outcome||"—"}</td>
+                <td style={{...tdS,fontSize:9,color:"#999"}}>{g.lockedAt?new Date(g.lockedAt).toLocaleString():""}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
