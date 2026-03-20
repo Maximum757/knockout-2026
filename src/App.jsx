@@ -951,7 +951,6 @@ function ScoresTab({lockedGames={},onLock}){
         }
       }
       if(changed){
-        setLockedGames(newLocked);
         // Save each new game individually to Firebase
         for(const[id,gData] of Object.entries(newLocked)){
           if(!lockedGames[id]) saveLockedGame(id,gData);
