@@ -747,32 +747,49 @@ async function saveLockedGame(gameId,gameData){
 // ═══════════════════════════════════════════════
 // APPLY LOCKED GAMES TO BRACKET
 // ═══════════════════════════════════════════════
+
+// R1 matchup pairs → R2 slot mapping
+// R1 matchups: 0-3, 4-7, 8-11, 12-15, 16-19, 20-23, 24-27, 28-31
+// R2 slots (4 rows each): 2-5, 10-13, 18-21, 26-29
+// R1 pair (0-3)+(4-7) → R2 rows 2-5: winner of 0-3 gets top half (rows 2-3), winner of 4-7 gets bottom (rows 4-5)
+// R1 pair (8-11)+(12-15) → R2 rows 10-13
+// R1 pair (16-19)+(20-23) → R2 rows 18-21
+// R1 pair (24-27)+(28-31) → R2 rows 26-29
+const R2_MAP=[
+  {r1a:0,r1b:4,r2:2},{r1a:8,r1b:12,r2:10},{r1a:16,r1b:20,r2:18},{r1a:24,r1b:28,r2:26}
+];
+// R2→S16: R2 pairs → S16 slots (2 rows each)
+// R2(2-5)+(10-13) → S16 rows 3-4 (top) and 11-12 (bottom)
+// R2(18-21)+(26-29) → S16 rows 19-20 (top) and 27-28 (bottom)
+const S16_MAP=[
+  {r2a:2,r2b:10,s16t:3,s16b:11},{r2a:18,r2b:26,s16t:19,s16b:27}
+];
+// S16→E8: S16(3-4,11-12) → E8 rows 7-8 (top) and 23-24 (bottom)
+const E8_MAP=[{s16t:3,s16b:11,e8t:7,e8b:23}];
+// E8→F4: E8(7-8,23-24) → F4 rows 15-16
+const F4_MAP=[{e8t:7,e8b:23,f4:15}];
+
 function applyLockedGamesToBracket(lockedGames){
   if(!lockedGames) return;
   const entries=Object.values(lockedGames);
   if(entries.length===0) return;
   
-  // Build a lookup: team name → {region, row} in the bracket
+  // Build lookup: team name → {region, row}
   const teamLookup={};
   for(const region of ["East","South","Midwest","West"]){
     const grid=B[region];
     for(let r=0;r<grid.length;r+=2){
-      // Team names are in col 1 on even rows (seed rows)
       const teamName=grid[r]?grid[r][1]:null;
       if(teamName) teamLookup[teamName]={region,row:r};
     }
   }
   
-  // Helper to fuzzy-match ESPN team names to bracket team names
   function findTeam(espnName){
     if(!espnName) return null;
-    // Direct match
     if(teamLookup[espnName]) return {name:espnName,...teamLookup[espnName]};
-    // Partial match
     const lower=espnName.toLowerCase();
     for(const[name,info] of Object.entries(teamLookup)){
       if(lower.includes(name.toLowerCase()) || name.toLowerCase().includes(lower)) return {name,...info};
-      // Handle abbreviations: "NC State Wolfpack" → "NC State"
       const parts=lower.split(/\s+/);
       const nameParts=name.toLowerCase().split(/\s+/);
       if(parts.length>=2 && nameParts.length>=2 && parts[0]===nameParts[0] && parts[1]===nameParts[1]) return {name,...info};
@@ -781,54 +798,169 @@ function applyLockedGamesToBracket(lockedGames){
   }
   
   for(const g of entries){
-    // Find both teams in the bracket
     const fav=findTeam(g.favTeam);
     const dog=findTeam(g.dogTeam);
     if(!fav || !dog) continue;
-    // Both should be in the same region and adjacent matchup rows
     if(fav.region!==dog.region) continue;
     
     const grid=B[fav.region];
-    const favRow=fav.row; // seed row of favorite
-    const dogRow=dog.row; // seed row of underdog
-    
-    // Write scores into col 2 (score column for R1)
-    // Favorite's score goes on the favorite's seed row (col 2)
-    // But we need to figure out which score column (R1=col2, R2=col5, etc)
-    // For R1, the score is in col 2
-    // The favorite's score row is favRow (seed row), and the score also appears on favRow+1 (owner row)
-    // Actually in the 2025 format: seed row col2 = FAV or score, owner row col2 = score
-    
-    // For R1: the 4-row matchup has scores in col 2
-    // Row 0 (hi seed): col2 = FAV or score  
-    // Row 1 (hi owner): col2 = score
-    // Row 2 (lo seed): col2 = score
-    // Row 3 (lo owner): col2 = (score) in parens if lost
-    
-    // Determine which team is the higher seed (row comes first in the matchup)
-    const hiRow=Math.min(favRow,dogRow);
-    const loRow=Math.max(favRow,dogRow);
-    const hiIsFav=(favRow===hiRow);
+    const hiRow=Math.min(fav.row,dog.row);
+    const loRow=Math.max(fav.row,dog.row);
+    const hiIsFav=(fav.row===hiRow);
     const hiScore=hiIsFav?g.favScore:g.dogScore;
     const loScore=hiIsFav?g.dogScore:g.favScore;
-    const hiSpread=hiIsFav?"-"+Math.abs(parseFloat(g.spread)):"+"+Math.abs(parseFloat(g.spread));
-    const loSpread=hiIsFav?"+"+Math.abs(parseFloat(g.spread)):"-"+Math.abs(parseFloat(g.spread));
-    
-    // Determine who won
     const hiScoreNum=parseFloat(hiScore);
     const loScoreNum=parseFloat(loScore);
     const hiWon=hiScoreNum>loScoreNum;
+    const sprAbs=Math.abs(parseFloat(g.spread));
     
-    // Write to grid — R1 scores in col 2
-    if(grid[hiRow]) grid[hiRow][2]=hiWon?"FAV":"("+hiScore+")";
-    if(grid[hiRow+1]) grid[hiRow+1][2]=String(hiScore);
-    if(grid[loRow]) grid[loRow][2]=hiWon?"("+loScore+")":loScore;
-    if(grid[loRow+1]) grid[loRow+1][2]=hiWon?loScore:"FAV";
+    // Determine the score column based on which round this matchup is in
+    // R1: rows are in 4-row blocks starting at 0,4,8,...28 → score col = 2
+    // R2: rows at 2-5,10-13,18-21,26-29 → score col = 5
+    // S16: rows at 3-4,11-12,19-20,27-28 → score col = 8
+    // E8: rows at 7-8,23-24 → score col = 11
+    // For now, detect round from row position
+    const matchupStart=hiRow;
+    const blockSize=loRow-hiRow+2; // 4 for R1/R2, 2 for S16+
+    let scoreCol=2; // default R1
+    const R2_ROWS=new Set([2,3,4,5,10,11,12,13,18,19,20,21,26,27,28,29]);
+    const S16_ROWS=new Set([3,4,11,12,19,20,27,28]);
+    const E8_ROWS=new Set([7,8,23,24]);
+    const F4_ROWS=new Set([15,16]);
+    if(F4_ROWS.has(hiRow)) scoreCol=14; // F4 has no score col in region
+    else if(E8_ROWS.has(hiRow)) scoreCol=11;
+    else if(S16_ROWS.has(hiRow) && blockSize<=3) scoreCol=8;
+    else if(R2_ROWS.has(hiRow) && blockSize>=4) scoreCol=5;
     
-    // Spread should already be in col 0 of owner rows, but update if needed
-    // (spreads were hardcoded, but ESPN closing line might differ slightly)
+    // Write scores — format matches 2025:
+    // Winner's seed row: "FAV" 
+    // Winner's owner row: actual score
+    // Loser's seed row: "(score)" in parens
+    // Loser's owner row: actual score or "(score)"
     
-    console.log("Applied to bracket:",fav.region,g.favTeam,"vs",g.dogTeam,"→",g.outcome);
+    // For the hi-seed side:
+    if(grid[hiRow]) grid[hiRow][scoreCol]=hiWon?"FAV":"("+hiScore+")";
+    if(grid[hiRow+1]) grid[hiRow+1][scoreCol]=String(hiScore);
+    // For the lo-seed side:
+    if(grid[loRow]) grid[loRow][scoreCol]=hiWon?"("+loScore+")":String(loScore);
+    if(grid[loRow+1]) grid[loRow+1][scoreCol]=hiWon?String(loScore):"FAV";
+    
+    // Also write the score+spread value for the underdog
+    // The underdog's seed row should show the adjusted score
+    // In 2025 format, this was just the raw score. The spread comparison is visual.
+    // Let's add the dog+spread as the score on the underdog's seed row instead
+    const dogRow=hiIsFav?loRow:hiRow;
+    const favRow2=hiIsFav?hiRow:loRow;
+    const dogScoreNum=hiIsFav?loScoreNum:hiScoreNum;
+    const dogPlusSpread=(dogScoreNum+sprAbs).toFixed(1);
+    // Actually — keep the 2025 format. The bracket already shows spread in col 0 and scores in col 2.
+    // The score comparison coloring handles the rest. Don't change the score format.
+    
+    // ═══ ADVANCEMENT ═══
+    // Determine outcome and who advances
+    const outcome=g.outcome;
+    if(!outcome) continue;
+    
+    // Get team names and owner names from the bracket
+    const hiTeam=grid[hiRow]?grid[hiRow][1]:"";
+    const hiOwner=grid[hiRow+1]?grid[hiRow+1][1]:"";
+    const loTeam=grid[loRow]?grid[loRow][1]:"";
+    const loOwner=grid[loRow+1]?grid[loRow+1][1]:"";
+    const hiSeed=grid[hiRow]?grid[hiRow][0]:"";
+    const loSeed=grid[loRow]?grid[loRow][0]:"";
+    
+    let advTeam,advOwner,advSeed;
+    if(outcome==="COVER"){
+      // Favorite covered → favorite's owner advances with favorite's team
+      advTeam=hiIsFav?hiTeam:loTeam;
+      advOwner=hiIsFav?hiOwner:loOwner;
+      advSeed=hiIsFav?hiSeed:loSeed;
+    }else if(outcome==="UPSET"){
+      // Underdog won → underdog's owner advances with underdog's team
+      advTeam=hiIsFav?loTeam:hiTeam;
+      advOwner=hiIsFav?loOwner:hiOwner;
+      advSeed=hiIsFav?loSeed:hiSeed;
+    }else if(outcome==="STEAL"){
+      // Favorite won but didn't cover → underdog's OWNER advances with FAVORITE's team
+      advTeam=hiIsFav?hiTeam:loTeam; // favorite's team
+      advOwner=hiIsFav?loOwner:hiOwner; // underdog's owner
+      advSeed=hiIsFav?hiSeed:loSeed; // use favorite's seed? Actually use the advancing position's seed
+    }else continue;
+    
+    // Find the next round slot for this matchup
+    // R1 → R2: find which R2 slot this feeds into
+    if(scoreCol===2){
+      for(const m of R2_MAP){
+        if(matchupStart===m.r1a||matchupStart===m.r1b){
+          const isTopHalf=(matchupStart===m.r1a);
+          const r2SeedRow=isTopHalf?m.r2:m.r2+2;
+          const r2OwnerRow=r2SeedRow+1;
+          // Write seed, team, and owner into R2 slot
+          if(grid[r2SeedRow]){
+            grid[r2SeedRow][3]=advSeed; // seed col for R2
+            grid[r2SeedRow][4]=advTeam; // name col for R2
+          }
+          if(grid[r2OwnerRow]){
+            // Spread will come from ESPN when R2 game starts
+            grid[r2OwnerRow][4]=advOwner; // owner name
+          }
+          console.log("Advanced to R2:",advTeam,advOwner,"→ row",r2SeedRow,fav.region);
+          break;
+        }
+      }
+    }
+    // R2 → S16
+    else if(scoreCol===5){
+      for(const m of S16_MAP){
+        if(matchupStart===m.r2a||matchupStart===m.r2b){
+          const isTopHalf=(matchupStart===m.r2a);
+          const s16Row=isTopHalf?m.s16t:m.s16b;
+          if(grid[s16Row]){
+            grid[s16Row][6]=advSeed;
+            grid[s16Row][7]=advTeam;
+          }
+          if(grid[s16Row+1]){
+            grid[s16Row+1][7]=advOwner;
+          }
+          console.log("Advanced to S16:",advTeam,advOwner,"→ row",s16Row,fav.region);
+          break;
+        }
+      }
+    }
+    // S16 → E8
+    else if(scoreCol===8){
+      for(const m of E8_MAP){
+        if(matchupStart===m.s16t||matchupStart===m.s16b){
+          const isTopHalf=(matchupStart===m.s16t);
+          const e8Row=isTopHalf?m.e8t:m.e8b;
+          if(grid[e8Row]){
+            grid[e8Row][9]=advSeed;
+            grid[e8Row][10]=advTeam;
+          }
+          if(grid[e8Row+1]){
+            grid[e8Row+1][10]=advOwner;
+          }
+          console.log("Advanced to E8:",advTeam,advOwner,"→ row",e8Row,fav.region);
+          break;
+        }
+      }
+    }
+    // E8 → F4
+    else if(scoreCol===11){
+      for(const m of F4_MAP){
+        if(matchupStart===m.e8t||matchupStart===m.e8b){
+          if(grid[15]){
+            grid[15][12]=advSeed;
+            grid[15][13]=advTeam;
+          }
+          if(grid[16]){
+            grid[16][13]=advOwner;
+          }
+          console.log("Advanced to F4:",advTeam,advOwner,fav.region);
+          break;
+        }
+      }
+    }
   }
 }
 
